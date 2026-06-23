@@ -29,10 +29,14 @@ import httpx
 # này khởi động uvicorn ở background subprocess và đợi `/healthz` trả ready.
 
 # %%
+import os, sys
 ROOT = Path(_setup.__file__).resolve().parent.parent
+VENV_BIN = ROOT / ".venv" / "bin"
+ENV = {**os.environ, "PATH": str(VENV_BIN) + ":" + os.environ.get("PATH", "")}
 proc = subprocess.Popen(
     ["uvicorn", "app.main:app", "--port", "8000", "--log-level", "warning"],
     cwd=str(ROOT),
+    env=ENV,
 )
 
 # Đợi server up + warm (Searcher.from_corpus loads embeddings + indexes 1000 docs)

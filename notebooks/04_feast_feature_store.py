@@ -22,8 +22,11 @@ from pathlib import Path
 
 import polars as pl
 
+import os, sys
 REPO_ROOT = Path(_setup.__file__).resolve().parent.parent
+VENV_BIN = REPO_ROOT / ".venv" / "bin"
 FEAST_DIR = REPO_ROOT / "app" / "feast_repo"
+ENV = {**os.environ, "PATH": str(VENV_BIN) + ":" + os.environ.get("PATH", "")}
 FEAST_DATA = FEAST_DIR / "data"
 FEAST_DATA.mkdir(exist_ok=True)
 
@@ -86,6 +89,7 @@ for p in sorted(FEAST_DATA.glob("*.parquet")):
 res = subprocess.run(
     ["feast", "apply"],
     cwd=str(FEAST_DIR),
+    env=ENV,
     capture_output=True, text=True, check=False,
 )
 print("STDOUT:")
@@ -106,6 +110,7 @@ end_dt = NOW.strftime("%Y-%m-%dT%H:%M:%S")
 res = subprocess.run(
     ["feast", "materialize-incremental", end_dt],
     cwd=str(FEAST_DIR),
+    env=ENV,
     capture_output=True, text=True, check=False,
 )
 print(res.stdout[-1500:])
